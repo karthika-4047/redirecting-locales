@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Locale-based URL Generation</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        label {
+            font-size: 16px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a.redirect {
+            color: green;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        tbody {
+            width: 100%;
+            display: block;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        thead, tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Locale-based URL Generation</h1>
+    <form id="urlForm">
+        <label for="url">Base URL:</label>
+        <input type="text" id="url" name="url" value="https://www.microsoft.com/accessibility/assistive-technology-partners" required>
+        <button type="submit">Submit</button>
+    </form>
+    <table id="output">
+        <thead>
+            <tr>
+                <th>Locale</th>
+                <th>Original URLs</th>
+                <th>Redirecting URLs</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        document.getElementById('urlForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const url = document.getElementById('url').value;
+            fetch(`/generate?url=${encodeURIComponent(url)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.querySelector('#output tbody');
+                    tbody.innerHTML = ''; // Clear existing rows
+                    data.urls.forEach(entry => {
+                        const status = entry.redirectUrl === 'Error' ? 'Broken' : 'Working';
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${entry.locale}</td>
+                            <td><a href="${entry.originalUrl}" target="_blank">${entry.originalUrl}</a></td>
+                            <td><a href="${entry.redirectUrl}" target="_blank" class="redirect">${entry.redirectUrl}</a></td>
+                            <td>${status}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+</body>
+</html>
